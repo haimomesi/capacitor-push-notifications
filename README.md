@@ -1,4 +1,4 @@
-# capacitor-voip-push-notifications
+# capacitor-voippush-notifications
 
 The Push Notifications API provides access to native push notifications.
 
