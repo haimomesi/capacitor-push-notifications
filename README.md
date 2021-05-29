@@ -1,4 +1,4 @@
-# @capacitor/push-notifications
+# capacitor-voip-push-notifications
 
 The Push Notifications API provides access to native push notifications.
 
@@ -24,6 +24,8 @@ func application(_ application: UIApplication, didFailToRegisterForRemoteNotific
   NotificationCenter.default.post(name: .capacitorDidFailToRegisterForRemoteNotifications, object: error)
 }
 ```
+
+The VoIP events does not include the PushKit delegation. You must take care of it yourself and send the data over the NotificationCenter
 
 ## Android
 
