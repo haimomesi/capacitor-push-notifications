@@ -154,6 +154,10 @@ export interface PushNotificationsPlugin {
    * @since 1.0.0
    */
   removeAllListeners(): Promise<void>;
+
+  startCall(options: { sender: string, uuid: string, companyId: string, branchId: string, jid: string, hasVideo: boolean }): Promise<PluginListenerHandle> & PluginListenerHandle;
+
+  cancelCall(options: { uuid: string }): Promise<PluginListenerHandle> & PluginListenerHandle;
 }
 
 export interface PushNotificationSchema {
