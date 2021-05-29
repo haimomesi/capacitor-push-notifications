@@ -1,9 +1,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.capacitorjs.plugins.pushnotifications">
-
+    package="im.mantu.ionic.pushnotifications">
     <application>
-        <service android:name="com.capacitorjs.plugins.pushnotifications.MessagingService" android:exported="false">
+        <!-- <service android:name="im.mantu.ionic.pushnotifications.CallingService"/> -->
+        <service android:name="im.mantu.ionic.pushnotifications.MessagingService" android:exported="false">
             <intent-filter>
+                <action android:name="com.google.firebase.INSTANCE_ID_EVENT" />
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
         </service>

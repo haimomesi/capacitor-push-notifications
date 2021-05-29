@@ -18,6 +18,12 @@ public class PushNotificationsPlugin: CAPPlugin {
     private let notificationDelegateHandler = PushNotificationsHandler()
     private var appDelegateRegistrationCalled: Bool = false
 
+    private static let UpdatePushCredentialsNotificationName = "updatePushKitCredentialsNotification"
+    private static let InvalidatePushCredentialsNotificationName = "invalidatePushKitCredentialsNotification"
+    private static let IncomingPushNotificationName = "incomingPushKitPushNotification"
+    private static let StartCall = "startCall"
+    private static let CancelCall = "cancelCall"
+
     override public func load() {
         self.bridge?.notificationRouter.pushNotificationHandler = self.notificationDelegateHandler
         self.notificationDelegateHandler.plugin = self
@@ -31,6 +37,10 @@ public class PushNotificationsPlugin: CAPPlugin {
                                                selector: #selector(self.didFailToRegisterForRemoteNotificationsWithError(notification:)),
                                                name: .capacitorDidFailToRegisterForRemoteNotifications,
                                                object: nil)
+
+        NotificationCenter.default.addObserver(self, selector: #selector(self.pushRegistryUpdateCredentials(notification:)), name: Notification.Name(PushNotificationsPlugin.UpdatePushCredentialsNotificationName), object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(self.pushRegistryInvalidCredentials(notification:)), name: Notification.Name(PushNotificationsPlugin.InvalidatePushCredentialsNotificationName), object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(self.pushRegistryIncomingPush(notification:)), name: Notification.Name(PushNotificationsPlugin.IncomingPushNotificationName), object: nil)
     }
 
     /**
@@ -158,11 +168,13 @@ public class PushNotificationsPlugin: CAPPlugin {
         if let deviceToken = notification.object as? Data {
             let deviceTokenString = deviceToken.reduce("", {$0 + String(format: "%02X", $1)})
             notifyListeners("registration", data: [
-                "value": deviceTokenString
+                "token": deviceTokenString,
+                "tokenType": 1
             ])
         } else if let stringToken = notification.object as? String {
             notifyListeners("registration", data: [
-                "value": stringToken
+                "token": stringToken,
+                "tokenType": 1
             ])
         } else {
             notifyListeners("registrationError", data: [
@@ -178,6 +190,71 @@ public class PushNotificationsPlugin: CAPPlugin {
         }
         notifyListeners("registrationError", data: [
             "error": error.localizedDescription
+        ])
+    }
+
+    @objc func startCall(_ call: CAPPluginCall) {
+        
+        if let sender = call.getString("sender"),
+           let uuidString = call.getString("uuid"),
+           let companyId = call.getString("companyId"),
+           let branchId = call.getString("branchId"),
+           let jid = call.getString("jid"),
+           let hasVideo = call.getBool("hasVideo"),
+           let callUUID = UUID(uuidString: uuidString) {
+                        
+            NotificationCenter.default.post(name: Notification.Name(PushNotificationsPlugin.StartCall), object: call)
+            
+            call.resolve([
+                "success": true
+            ])
+        } else {
+            call.reject("PushNotificationsPlugin Missing Varibles")
+        }
+    }
+    
+    @objc func cancelCall(_ call: CAPPluginCall) {
+        
+        if let uuidString = call.getString("uuid"),
+           let callUUID = UUID(uuidString: uuidString) {
+            
+            NotificationCenter.default.post(name: Notification.Name(PushNotificationsPlugin.CancelCall), object: callUUID)
+            
+            call.resolve([
+                "success": true
+            ])
+        } else {
+            call.reject("PushNotificationsPlugin Missing UUID")
+        }
+    
+    }
+    
+    @objc public func pushRegistryUpdateCredentials(notification: NSNotification){
+        guard let deviceToken = notification.object as? String else {
+            return
+        }
+        notifyListeners("registration", data: [
+            "token": deviceToken,
+            "tokenType": 2
+        ])
+    }
+    
+    @objc public func pushRegistryInvalidCredentials(notification: NSNotification) {
+        NSLog("PushNotificationsPlugin Plugin - Error registering device");
+        notifyListeners("registrationError", data: [
+            "error": error.localizedDescription
+        ])
+    }
+    
+    @objc public func pushRegistryIncomingPush(notification: NSNotification) {
+        guard let payload = notification.object as? [AnyHashable : Any] else {
+            return
+        }
+        NSLog("PushNotificationsPlugin Plugin - ", notification)
+        notifyListeners("pushNotificationReceived", data: [
+            "id": 0,
+            "data": payload,
+            "voip": true
         ])
     }
 }

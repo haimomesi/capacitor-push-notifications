@@ -229,6 +229,15 @@ export interface PushNotificationSchema {
    * @since 1.0.0
    */
   groupSummary?: boolean;
+
+  /**
+   * Designate this notification as a VoIP Notification.
+   *
+   * Only available on iOS.
+   *
+   * @since 1.0.0
+   */
+  voip?: boolean;
 }
 
 export interface ActionPerformed {
@@ -252,7 +261,16 @@ export interface Token {
   /**
    * @since 1.0.0
    */
-  value: string;
+  token: string;
+
+  /**
+   * Designate this token as VoIP.
+   *
+   * Only available on iOS.
+   *
+   * @since 1.0.0
+   */
+  tokenType: number;
 }
 
 export interface DeliveredNotifications {

@@ -1,4 +1,4 @@
-package com.capacitorjs.plugins.pushnotifications;
+package im.mantu.ionic.pushnotifications;
 
 import androidx.annotation.NonNull;
 import com.google.firebase.messaging.FirebaseMessagingService;

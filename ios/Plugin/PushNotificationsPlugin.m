@@ -13,4 +13,6 @@ CAP_PLUGIN(PushNotificationsPlugin, "PushNotifications",
            CAP_PLUGIN_METHOD(createChannel, CAPPluginReturnPromise);
            CAP_PLUGIN_METHOD(listChannels, CAPPluginReturnPromise);
            CAP_PLUGIN_METHOD(deleteChannel, CAPPluginReturnPromise);
+           CAP_PLUGIN_METHOD(startCall, CAPPluginReturnPromise);
+           CAP_PLUGIN_METHOD(cancelCall, CAPPluginReturnPromise);
 )

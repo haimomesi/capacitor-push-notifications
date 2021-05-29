@@ -1,4 +1,4 @@
-package com.capacitorjs.plugins.pushnotifications;
+package im.mantu.ionic.pushnotifications;
 
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -190,7 +190,8 @@ public class PushNotificationsPlugin extends Plugin {
 
     public void sendToken(String token) {
         JSObject data = new JSObject();
-        data.put("value", token);
+        data.put("token", token);
+        data.put("tokenType", 1);
         notifyListeners(EVENT_TOKEN_CHANGE, data, true);
     }
 
@@ -251,5 +252,9 @@ public class PushNotificationsPlugin extends Plugin {
             return (PushNotificationsPlugin) handle.getInstance();
         }
         return null;
+    }
+
+    public void notifyIonic(JSObject actionJson) {
+        notifyListeners("pushNotificationReceived", actionJson, true);
     }
 }
