@@ -1,4 +1,4 @@
-# capacitor-voip-push-notifications
+# capacitor-push-notifications
 
 The Push Notifications API provides access to native push notifications.
 
@@ -129,6 +129,8 @@ On Android, there are various system and app states that can affect the delivery
 * [`addListener('pushNotificationReceived', ...)`](#addlistenerpushnotificationreceived-)
 * [`addListener('pushNotificationActionPerformed', ...)`](#addlistenerpushnotificationactionperformed-)
 * [`removeAllListeners()`](#removealllisteners)
+* [`startCall(...)`](#startcall)
+* [`cancelCall(...)`](#cancelcall)
 * [Interfaces](#interfaces)
 * [Type Aliases](#type-aliases)
 
@@ -349,6 +351,36 @@ removeAllListeners() => Promise<void>
 ```
 
 Remove all native listeners for this plugin.
+
+--------------------
+
+
+### startCall(...)
+
+```typescript
+startCall(options: { sender: string; uuid: string; companyId: string; branchId: string; jid: string; hasVideo: boolean; }) => Promise<PluginListenerHandle> & PluginListenerHandle
+```
+
+| Param         | Type                                                                                                                |
+| ------------- | ------------------------------------------------------------------------------------------------------------------- |
+| **`options`** | <code>{ sender: string; uuid: string; companyId: string; branchId: string; jid: string; hasVideo: boolean; }</code> |
+
+**Returns:** <code>Promise&lt;<a href="#pluginlistenerhandle">PluginListenerHandle</a>&gt; & <a href="#pluginlistenerhandle">PluginListenerHandle</a></code>
+
+--------------------
+
+
+### cancelCall(...)
+
+```typescript
+cancelCall(options: { uuid: string; }) => Promise<PluginListenerHandle> & PluginListenerHandle
+```
+
+| Param         | Type                           |
+| ------------- | ------------------------------ |
+| **`options`** | <code>{ uuid: string; }</code> |
+
+**Returns:** <code>Promise&lt;<a href="#pluginlistenerhandle">PluginListenerHandle</a>&gt; & <a href="#pluginlistenerhandle">PluginListenerHandle</a></code>
 
 --------------------
 
