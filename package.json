@@ -1,5 +1,5 @@
 {
-  "name": "capacitor-push-notifications",
+  "name": "capacitor-voip-push-notifications",
   "version": "1.1.1",
   "description": "The Push Notifications API provides access to native push notifications.",
   "main": "dist/plugin.cjs.js",
@@ -11,7 +11,7 @@
     "android/build.gradle",
     "dist/",
     "ios/Plugin/",
-    "CapacitorPushNotifications.podspec"
+    "CapacitorVoipPushNotifications.podspec"
   ],
   "author": "Ionic <hi@ionicframework.com>",
   "license": "MIT",
