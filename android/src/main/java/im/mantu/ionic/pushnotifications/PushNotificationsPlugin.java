@@ -9,9 +9,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.service.notification.StatusBarNotification;
-
 import androidx.core.content.ContextCompat;
-
 import com.getcapacitor.Bridge;
 import com.getcapacitor.JSArray;
 import com.getcapacitor.JSObject;
@@ -30,7 +28,6 @@ import com.google.firebase.messaging.RemoteMessage;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -59,8 +56,8 @@ public class PushNotificationsPlugin extends Plugin {
 
         notificationChannelManager = new NotificationChannelManager(getActivity(), notificationManager);
 
-        Intent intent = staticBridge.getActivity().getIntent();;
-        if (intent != null){
+        Intent intent = staticBridge.getActivity().getIntent();
+        if (intent != null) {
             handleOnNewIntent(intent);
         }
     }
@@ -86,7 +83,7 @@ public class PushNotificationsPlugin extends Plugin {
             actionJson.put("actionId", "tap");
             actionJson.put("notification", notificationJson);
             notifyListeners("pushNotificationActionPerformed", actionJson, true);
-        } else if(data.getAction() != null && (data.getAction().equals("answer") || data.getAction().equals("decline"))){
+        } else if (data.getAction() != null && (data.getAction().equals("answer") || data.getAction().equals("decline"))) {
             JSObject dataJson = new JSObject();
             PushNotificationsPlugin pushPlugin = PushNotificationsPlugin.getPushNotificationsInstance();
             String sender = data.getStringExtra(CallingNotificationService.DATA_SENDER);
@@ -96,19 +93,21 @@ public class PushNotificationsPlugin extends Plugin {
             String hasVideo = data.getStringExtra(CallingNotificationService.DATA_HAS_VIDEO);
             String callUUID = data.getStringExtra(CallingNotificationService.DATA_CALL_UUID);
             JSObject notificationJson = new JSObject()
-                    .put("sender", sender)
-                    .put("companyId", companyId)
-                    .put("branchId", branchId)
-                    .put("jid", jid)
-                    .put("hasVideo", hasVideo)
-                    .put("action", data.getAction())
-                    .put("callUUID", callUUID);
+                .put("sender", sender)
+                .put("companyId", companyId)
+                .put("branchId", branchId)
+                .put("jid", jid)
+                .put("hasVideo", hasVideo)
+                .put("action", data.getAction())
+                .put("callUUID", callUUID);
             dataJson.put("data", notificationJson);
             if (pushPlugin != null) {
                 pushPlugin.notifyIonic(dataJson);
             }
         }
-        this.getActivity().getApplicationContext().stopService(new Intent(this.getActivity().getApplicationContext(), CallingNotificationService.class));
+        this.getActivity()
+            .getApplicationContext()
+            .stopService(new Intent(this.getActivity().getApplicationContext(), CallingNotificationService.class));
     }
 
     @PluginMethod
@@ -244,7 +243,6 @@ public class PushNotificationsPlugin extends Plugin {
     }
 
     public static void startCallNotificationService(Context context, RemoteMessage remoteMessage) {
-
         Intent service = new Intent(context, CallingNotificationService.class);
         Map<String, String> data = remoteMessage.getData();
 
@@ -277,18 +275,27 @@ public class PushNotificationsPlugin extends Plugin {
         } else {
             JSObject dataJson = new JSObject();
             JSObject notificationJson = new JSObject()
-                    .put("sender", sender)
-                    .put("companyId", companyId)
-                    .put("branchId", branchId)
-                    .put("jid", jid)
-                    .put("hasVideo", hasVideo)
-                    .put("action", action)
-                    .put("callUUID", callUUID);
+                .put("sender", sender)
+                .put("companyId", companyId)
+                .put("branchId", branchId)
+                .put("jid", jid)
+                .put("hasVideo", hasVideo)
+                .put("action", action)
+                .put("callUUID", callUUID);
             dataJson.put("data", notificationJson);
             PushNotificationsPlugin pushPlugin = PushNotificationsPlugin.getPushNotificationsInstance();
-            if(pushPlugin != null){
+            if (pushPlugin != null) {
                 pushPlugin.notifyIonic(dataJson);
             }
+        }
+    }
+
+    public static void sendRemoteMessage(RemoteMessage remoteMessage) {
+        PushNotificationsPlugin pushPlugin = PushNotificationsPlugin.getPushNotificationsInstance();
+        if (pushPlugin != null) {
+            pushPlugin.fireNotification(remoteMessage);
+        } else {
+            lastMessage = remoteMessage;
         }
     }
 
@@ -332,5 +339,4 @@ public class PushNotificationsPlugin extends Plugin {
     public void notifyIonic(JSObject actionJson) {
         notifyListeners("pushNotificationReceived", actionJson, true);
     }
-
 }
