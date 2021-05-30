@@ -242,7 +242,7 @@ public class PushNotificationsPlugin: CAPPlugin {
     @objc public func pushRegistryInvalidCredentials(notification: NSNotification) {
         NSLog("PushNotificationsPlugin Plugin - Error registering device");
         notifyListeners("registrationError", data: [
-            "error": error.localizedDescription
+            "error": PushNotificationError.tokenRegistrationFailed
         ])
     }
     

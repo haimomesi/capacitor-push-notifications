@@ -1,5 +1,6 @@
 package im.mantu.ionic.pushnotifications;
 
+import android.app.Activity;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.content.Context;
@@ -8,6 +9,9 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.service.notification.StatusBarNotification;
+
+import androidx.core.content.ContextCompat;
+
 import com.getcapacitor.Bridge;
 import com.getcapacitor.JSArray;
 import com.getcapacitor.JSObject;
@@ -25,6 +29,8 @@ import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.messaging.RemoteMessage;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -45,12 +51,18 @@ public class PushNotificationsPlugin extends Plugin {
         firebaseMessagingService = new MessagingService();
 
         staticBridge = this.bridge;
+
         if (lastMessage != null) {
             fireNotification(lastMessage);
             lastMessage = null;
         }
 
         notificationChannelManager = new NotificationChannelManager(getActivity(), notificationManager);
+
+        Intent intent = staticBridge.getActivity().getIntent();;
+        if (intent != null){
+            handleOnNewIntent(intent);
+        }
     }
 
     @Override
@@ -74,12 +86,35 @@ public class PushNotificationsPlugin extends Plugin {
             actionJson.put("actionId", "tap");
             actionJson.put("notification", notificationJson);
             notifyListeners("pushNotificationActionPerformed", actionJson, true);
+        } else if(data.getAction() != null && (data.getAction().equals("answer") || data.getAction().equals("decline"))){
+            JSObject dataJson = new JSObject();
+            PushNotificationsPlugin pushPlugin = PushNotificationsPlugin.getPushNotificationsInstance();
+            String sender = data.getStringExtra(CallingNotificationService.DATA_SENDER);
+            String companyId = data.getStringExtra(CallingNotificationService.DATA_COMPANY_ID);
+            String branchId = data.getStringExtra(CallingNotificationService.DATA_BRANCH_ID);
+            String jid = data.getStringExtra(CallingNotificationService.DATA_JID);
+            String hasVideo = data.getStringExtra(CallingNotificationService.DATA_HAS_VIDEO);
+            String callUUID = data.getStringExtra(CallingNotificationService.DATA_CALL_UUID);
+            JSObject notificationJson = new JSObject()
+                    .put("sender", sender)
+                    .put("companyId", companyId)
+                    .put("branchId", branchId)
+                    .put("jid", jid)
+                    .put("hasVideo", hasVideo)
+                    .put("action", data.getAction())
+                    .put("callUUID", callUUID);
+            dataJson.put("data", notificationJson);
+            if (pushPlugin != null) {
+                pushPlugin.notifyIonic(dataJson);
+            }
         }
+        this.getActivity().getApplicationContext().stopService(new Intent(this.getActivity().getApplicationContext(), CallingNotificationService.class));
     }
 
     @PluginMethod
     public void register(PluginCall call) {
         FirebaseMessaging.getInstance().setAutoInitEnabled(true);
+
         FirebaseInstanceId
             .getInstance()
             .getInstanceId()
@@ -208,12 +243,52 @@ public class PushNotificationsPlugin extends Plugin {
         }
     }
 
-    public static void sendRemoteMessage(RemoteMessage remoteMessage) {
-        PushNotificationsPlugin pushPlugin = PushNotificationsPlugin.getPushNotificationsInstance();
-        if (pushPlugin != null) {
-            pushPlugin.fireNotification(remoteMessage);
+    public static void startCallNotificationService(Context context, RemoteMessage remoteMessage) {
+
+        Intent service = new Intent(context, CallingNotificationService.class);
+        Map<String, String> data = remoteMessage.getData();
+
+        String companyId = data.get("companyId");
+        String sender = data.get("sender");
+        String callUUID = data.get("callUUID");
+        String branchId = data.get("branchId");
+        String jid = data.get("jid");
+        String hasVideo = data.get("hasVideo");
+        String action = data.get("action");
+        int id = Integer.parseInt(data.get("jid").replace("+", "").substring(4, 9));
+
+        service.setAction(CallingNotificationService.ACTION_CALL);
+
+        service.putExtra(CallingNotificationService.DATA_SENDER, sender);
+        service.putExtra(CallingNotificationService.DATA_HAS_VIDEO, hasVideo);
+        service.putExtra(CallingNotificationService.DATA_COMPANY_ID, companyId);
+        service.putExtra(CallingNotificationService.DATA_CALL_UUID, callUUID);
+        service.putExtra(CallingNotificationService.DATA_BRANCH_ID, branchId);
+        service.putExtra(CallingNotificationService.DATA_JID, jid);
+        service.putExtra(CallingNotificationService.DATA_ID, id);
+        service.putExtra(CallingNotificationService.DATA_ACTION, action);
+
+        if (staticBridge == null || !staticBridge.getApp().isActive()) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                context.startForegroundService(service);
+            } else {
+                context.startService(service);
+            }
         } else {
-            lastMessage = remoteMessage;
+            JSObject dataJson = new JSObject();
+            JSObject notificationJson = new JSObject()
+                    .put("sender", sender)
+                    .put("companyId", companyId)
+                    .put("branchId", branchId)
+                    .put("jid", jid)
+                    .put("hasVideo", hasVideo)
+                    .put("action", action)
+                    .put("callUUID", callUUID);
+            dataJson.put("data", notificationJson);
+            PushNotificationsPlugin pushPlugin = PushNotificationsPlugin.getPushNotificationsInstance();
+            if(pushPlugin != null){
+                pushPlugin.notifyIonic(dataJson);
+            }
         }
     }
 
@@ -257,4 +332,5 @@ public class PushNotificationsPlugin extends Plugin {
     public void notifyIonic(JSObject actionJson) {
         notifyListeners("pushNotificationReceived", actionJson, true);
     }
+
 }

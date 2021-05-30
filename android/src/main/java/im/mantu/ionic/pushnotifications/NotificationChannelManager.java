@@ -25,15 +25,15 @@ public class NotificationChannelManager {
         this.notificationManager = manager;
     }
 
-    private static String CHANNEL_ID = "id";
-    private static String CHANNEL_NAME = "name";
-    private static String CHANNEL_DESCRIPTION = "description";
-    private static String CHANNEL_IMPORTANCE = "importance";
-    private static String CHANNEL_VISIBILITY = "visibility";
-    private static String CHANNEL_SOUND = "sound";
-    private static String CHANNEL_VIBRATE = "vibration";
-    private static String CHANNEL_USE_LIGHTS = "lights";
-    private static String CHANNEL_LIGHT_COLOR = "lightColor";
+    private static final String CHANNEL_ID = "id";
+    private static final String CHANNEL_NAME = "name";
+    private static final String CHANNEL_DESCRIPTION = "description";
+    private static final String CHANNEL_IMPORTANCE = "importance";
+    private static final String CHANNEL_VISIBILITY = "visibility";
+    private static final String CHANNEL_SOUND = "sound";
+    private static final String CHANNEL_VIBRATE = "vibration";
+    private static final String CHANNEL_USE_LIGHTS = "lights";
+    private static final String CHANNEL_LIGHT_COLOR = "lightColor";
 
     public void createChannel(PluginCall call) {
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
