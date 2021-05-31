@@ -11,10 +11,8 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.widget.RemoteViews;
-
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
-
 import com.getcapacitor.BridgeActivity;
 
 public class CallingNotificationService extends Service {
@@ -52,13 +50,15 @@ public class CallingNotificationService extends Service {
 
                 try {
                     final Handler handler = new Handler(Looper.getMainLooper());
-                    handler.postDelayed(() -> {
-                        if (player != null && player.isPlaying()) {
-                            popupMissedCall(id + 1, sender);
-                        }
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-                            stopForeground(Service.STOP_FOREGROUND_REMOVE);
-                    }, 60000);
+                    handler.postDelayed(
+                        () -> {
+                            if (player != null && player.isPlaying()) {
+                                popupMissedCall(id + 1, sender);
+                            }
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) stopForeground(Service.STOP_FOREGROUND_REMOVE);
+                        },
+                        60000
+                    );
                 } catch (IllegalStateException ex) {
                     ex.printStackTrace();
                 }
@@ -79,7 +79,15 @@ public class CallingNotificationService extends Service {
         stopRingtone();
     }
 
-    private Notification callNotification(String sender, String hasVideo, String callUUID, String companyId, String branchId, String jid, String action) {
+    private Notification callNotification(
+        String sender,
+        String hasVideo,
+        String callUUID,
+        String companyId,
+        String branchId,
+        String jid,
+        String action
+    ) {
         // check if video
         try {
             String activityToStart = "im.mantu.ionic.MainActivity";
@@ -102,7 +110,12 @@ public class CallingNotificationService extends Service {
             intentAnswer.putExtra(DATA_BRANCH_ID, branchId);
             intentAnswer.putExtra(DATA_JID, jid);
             intentAnswer.putExtra(DATA_ACTION, action);
-            PendingIntent pIntentAnswer = PendingIntent.getActivity(this.getApplicationContext(), 0, intentAnswer, PendingIntent.FLAG_CANCEL_CURRENT);
+            PendingIntent pIntentAnswer = PendingIntent.getActivity(
+                this.getApplicationContext(),
+                0,
+                intentAnswer,
+                PendingIntent.FLAG_CANCEL_CURRENT
+            );
             // set decline pending intent
             Intent intentDecline = new Intent(this.getApplicationContext(), Class.forName(activityToStart));
             intentDecline.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
@@ -114,23 +127,31 @@ public class CallingNotificationService extends Service {
             intentDecline.putExtra(DATA_BRANCH_ID, branchId);
             intentDecline.putExtra(DATA_JID, jid);
             intentDecline.putExtra(DATA_ACTION, action);
-            PendingIntent pIntentDecline = PendingIntent.getActivity(this.getApplicationContext(), 0, intentDecline, PendingIntent.FLAG_CANCEL_CURRENT);
+            PendingIntent pIntentDecline = PendingIntent.getActivity(
+                this.getApplicationContext(),
+                0,
+                intentDecline,
+                PendingIntent.FLAG_CANCEL_CURRENT
+            );
             // set buttons click
             customView.setOnClickPendingIntent(R.id.btnAnswer, pIntentAnswer);
             customView.setOnClickPendingIntent(R.id.btnDecline, pIntentDecline);
             // build notification
-            NotificationCompat.Builder notification = new NotificationCompat.Builder(this.getApplicationContext(), "CallsNotifications2")
-                    .setContentTitle("Beezz")
-                    .setTicker("Call_STATUS")
-                    .setContentText("IncomingCall")
-                    .setSmallIcon(R.drawable.ic_notification)
-                    .setDefaults(Notification.DEFAULT_SOUND | Notification.DEFAULT_LIGHTS)
-                    .setCategory(NotificationCompat.CATEGORY_CALL)
-                    .setVibrate(null)
-                    .setOngoing(true)
-                    .setFullScreenIntent(pNotificationIntent, true)
-                    .setPriority(NotificationCompat.PRIORITY_HIGH);
-            notification.setStyle(new NotificationCompat.DecoratedCustomViewStyle()).setCustomContentView(customView).setCustomBigContentView(customView);
+            NotificationCompat.Builder notification = new NotificationCompat.Builder(this.getApplicationContext(), "CallsNotifications")
+                .setContentTitle("Beezz")
+                .setTicker("Call_STATUS")
+                .setContentText("IncomingCall")
+                .setSmallIcon(R.drawable.ic_notification)
+                .setDefaults(Notification.DEFAULT_SOUND | Notification.DEFAULT_LIGHTS)
+                .setCategory(NotificationCompat.CATEGORY_CALL)
+                .setVibrate(null)
+                .setOngoing(true)
+                .setFullScreenIntent(pNotificationIntent, true)
+                .setPriority(NotificationCompat.PRIORITY_HIGH);
+            notification
+                .setStyle(new NotificationCompat.DecoratedCustomViewStyle())
+                .setCustomContentView(customView)
+                .setCustomBigContentView(customView);
             return notification.build();
         } catch (ClassNotFoundException ignored) {
             return null;
@@ -156,18 +177,16 @@ public class CallingNotificationService extends Service {
             notificationIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             PendingIntent pNotificationIntent = PendingIntent.getActivity(this, 0, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
             NotificationCompat.Builder notification = new NotificationCompat.Builder(this, "MessagesNotifications")
-                    .setContentTitle("Beezz")
-                    .setTicker("Call_STATUS")
-                    .setContentText("Missed call from " + sender)
-                    .setSmallIcon(R.drawable.ic_notification)
-                    .setCategory(NotificationCompat.CATEGORY_MISSED_CALL)
-                    .setPriority(NotificationCompat.PRIORITY_HIGH);
+                .setContentTitle("Beezz")
+                .setTicker("Call_STATUS")
+                .setContentText("Missed call from " + sender)
+                .setSmallIcon(R.drawable.ic_notification)
+                .setCategory(NotificationCompat.CATEGORY_MISSED_CALL)
+                .setPriority(NotificationCompat.PRIORITY_HIGH);
             Notification n = notification.build();
             n.contentIntent = pNotificationIntent;
             NotificationManager notificationManager = (NotificationManager) getSystemService(Service.NOTIFICATION_SERVICE);
             notificationManager.notify(id, n);
-        } catch (ClassNotFoundException ignored) {
-        }
+        } catch (ClassNotFoundException ignored) {}
     }
-
 }
