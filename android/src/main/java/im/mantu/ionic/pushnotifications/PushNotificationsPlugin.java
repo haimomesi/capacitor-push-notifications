@@ -339,4 +339,8 @@ public class PushNotificationsPlugin extends Plugin {
     public void notifyIonic(JSObject actionJson) {
         notifyListeners("pushNotificationReceived", actionJson, true);
     }
+
+    public void notifyIonicPerformed(JSObject actionJson) {
+        notifyListeners("pushNotificationActionPerformed", actionJson, true);
+    }
 }
