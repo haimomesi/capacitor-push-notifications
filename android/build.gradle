@@ -27,6 +27,17 @@ android {
         versionName "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
+    flavorDimensions "branding"
+    productFlavors {
+        internalPush {
+            dimension "branding"
+            manifestPlaceholders["internal_push"] = true
+        }
+        FCM {
+            dimension "branding"
+            manifestPlaceholders["internal_push"] = false
+        }
+    }
     buildTypes {
         release {
             minifyEnabled false
@@ -44,7 +55,6 @@ android {
 
 repositories {
     google()
-    jcenter()
     mavenCentral()
 }
 

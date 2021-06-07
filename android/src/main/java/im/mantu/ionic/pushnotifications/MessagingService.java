@@ -1,7 +1,7 @@
 package im.mantu.ionic.pushnotifications;
 
-import android.app.NotificationManager;
 import androidx.annotation.NonNull;
+
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 
